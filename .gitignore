@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+db.json
+package.json
+package-lock.json
+*.log
+node_modules/
+public/
+.deploy*/
+/themes/landscape
