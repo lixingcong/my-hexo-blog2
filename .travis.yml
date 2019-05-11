@@ -13,15 +13,15 @@ before_install:
 - cp .travis/ssh_config ~/.ssh/config
 install:
 - npm install -g hexo-cli
-- hexo init temp_lxc
-- cd temp_lxc
+- hexo init hexo-empty
+- pushd hexo-empty
 - npm install
+- popd
+- mv hexo-empty/node_modules ./
+- mv hexo-empty/package.json ./
 before_script:
-- mv ../source ./
-- mv ../themes ./
-- mv ../_config.yml ./
-- mv ../deploy.sh ./
 - git config --global user.name 'lixingcong'
 - git config --global user.email 'lixingcong@live.com'
+- git submodule update --init --recursive
 script:
 - hexo g && bash deploy.sh
