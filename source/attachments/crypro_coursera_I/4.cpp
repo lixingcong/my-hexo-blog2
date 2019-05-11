@@ -1,0 +1,47 @@
+#include <iostream>
+#include <gmp.h>
+#include <cstring>
+using namespace std;
+static char N[]="179769313486231590772930519078902473361797697894230657273430081157732675805505620686985379449212982959585501387537164015710139858647833778606925583497541085196591615128057575940752635007475935288710823649949940771895617054361149474865046711015101563940680527540071584560878577663743040086340742855278549092581";
+static char P_minus_one[]="13407807929942597099574024998205846127479365820592393377723561443721764030073662768891111614362326998675040546094339320838419523375986027530441562135724300";//这个是question1求得p，然后减去1的结果
+static char Q_minus_one[]="13407807929942597099574024998205846127479365820592393377723561443721764030073778560980348930557750569660049234002192590823085163940025485114449475265364280";//这个是question1求得q，然后减去1的结果
+static char CT[]="22096451867410381776306561134883418017410069787892831071731839143676135600120538004282329650473509424343946219751512256465839967942889460764542040581564748988013734864120452325229320176487916666402997509188729971690526083222067771600019329260870009579993724077458967773697817571267229951148662959627934791540";
+
+int main() {
+	char PT[500];
+	mpz_t mpz_t_a,mpz_t_b,mpz_t_c; // 整数
+	mpz_t mpz_t_N,mpz_t_D,mpz_t_E,mpz_t_CT;
+	mpz_init(mpz_t_a);
+	mpz_init_set_str(mpz_t_b,P_minus_one,10);
+	mpz_init_set_str(mpz_t_c,Q_minus_one,10);
+
+	mpz_init_set_str(mpz_t_N,N,10); 
+	mpz_init_set_str(mpz_t_E,"65537",10);
+	mpz_init(mpz_t_D);
+	mpz_init_set_str(mpz_t_CT,CT,10);
+
+	mpz_mul(mpz_t_a,mpz_t_b,mpz_t_c); // 计算fi(N)存放到mpz_a
+	mpz_invert(mpz_t_D,mpz_t_E,mpz_t_a); // 65537的逆存放到mpz_t_D
+	mpz_powm (mpz_t_b ,mpz_t_CT, mpz_t_D, mpz_t_N);//明文解出来存放到mpz_b，解密是对N取模，而不是对fi(N)取模
+	
+	mpz_get_str(PT,16,mpz_t_b);	// 直接转成16为底
+	bool isFoundFlag=false;
+	unsigned char temp;
+	int i=0;
+	while(1){
+		if(isFoundFlag==true){
+			++i;
+			if(PT[i]>='0' && PT[i]<='9')temp=16*(PT[i]-'0');
+			else temp=16*(PT[i]-'a'+10);
+			++i;
+			if(PT[i]>='0' && PT[i]<='9')temp+=(PT[i]-'0');
+			else temp+=(PT[i]-'a'+10);
+			cout<<temp;
+		}else {
+			if(PT[i++]=='0' && PT[i]=='0')isFoundFlag=true;			
+		}
+		if(i>=strlen(PT))break;
+	}	
+	cout<<endl;
+	return 0;
+}

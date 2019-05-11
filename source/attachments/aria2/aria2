@@ -1,0 +1,59 @@
+#!/bin/sh
+# https://gist.github.com/jereksel/8217470
+
+### BEGIN INIT INFO
+# Provides: aria2
+# Required-Start: $local_fs $remote_fs
+# Required-Stop: $local_fs $remote_fs
+# Should-Start: $network
+# Should-Stop: $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: aria2c init script.
+# Description: Starts and stops aria2 daemon.
+### END INIT INFO
+
+USER="www-data"
+DAEMON=/usr/bin/aria2c
+CONF="/home/www-data/aria2/aria2.conf"
+
+start() {
+	if [ -f $CONF ]; then
+		echo "Starting aria2 daemon..."
+		start-stop-daemon -S -c $USER:$USER -x $DAEMON -- -D --conf-path=$CONF || echo "start fail"
+		pid=`pgrep -fu $USER $DAEMON`
+		echo "pid=$pid"
+	else
+		echo "$CONF was not found"
+	fi
+}
+
+stop() {
+	echo  "Stopping..."
+	start-stop-daemon -K -c $USER:$USER -x $DAEMON
+
+	if [ $? = "0" ];then
+		sleep 5
+		echo "stop ok"
+	else
+		echo "stop fail"
+	fi
+
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: /etc/init.d/aria2 {start|stop|restart}"
+		exit 1
+		;;
+esac
