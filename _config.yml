@@ -133,3 +133,11 @@ theme_config:
   
   motion:
     enable: false
+  
+  post_meta:
+    item_text: true
+    created_at: true
+    updated_at:
+      enable: false
+      another_day: true
+    categories: true
