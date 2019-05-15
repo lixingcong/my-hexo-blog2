@@ -6,7 +6,7 @@ categories: 编程
 ---
 Qt的多国语言功能强大，使用tr()函数时，一般是tr("ASCII")这样用法，然后从英文翻译得到其它语言。
 
-但是我们作为普通人一直都很贱，非得要使用tr("中文字符")实现中文到其它语言的翻译，因此需要略添加几步指定编码的步骤。
+但是我们一直都很贱，非得要使用tr("中文字符")实现中文到其它语言的翻译，因此需要略添加几步指定编码的步骤。
 <!-- more -->
 本文所有源代码文件均为UTF-8编码。以下步骤建议按顺序完成。从中可以感受到文本文件编码的威力：为什么全世界就没法统一一种编码格式呢？
 
@@ -67,7 +67,7 @@ CODECFORTR这个参数指定了生成ts文件时候的编码，若未指定合�
 
 使用Linguist翻译好文本后，按Ctrl+s保存，我们用文本工具打开ts文件，手工加入一行，指定编译qm文件使用的编码。
 
-（注意每次保存都要检查是否被Linguist覆盖了，若缺这行要继续补上）
+（注意每次Ctrl+s保存后，都要检查是否被Linguist覆盖了，若被覆盖缺这行要继续补上）
 
     <defaultcodec>utf-8</defaultcodec>
 
@@ -109,16 +109,18 @@ CODECFORTR这个参数指定了生成ts文件时候的编码，若未指定合�
         return QObject::tr("Hello");
     }
 
-在国际化翻译过程中，还有两种特例在使用tr()函数需要特别注意：
+在使用tr()函数时，还有几种字符串变量，需要特别注意：
 1. 静态变量（编译期间确定字符串，可以是类成员变量，也可以是函数内static变量）
 2. 全局变量（定义在全局作用域的变量，此时无上下文）
 3. const常量（运行期间不能被修改）
 
 既然是编译期间确定的变量，在运行期间就不能随意改变它们内存中的数据，应该怎么样返回国际化后的字符串呢？Qt提供两个宏```QT_TR_NOOP```和```QT_TRANSLATE_NOOP```，对应的UTF-8编码的宏为```QT_TR_NOOP_UTF8```和```QT_TRANSLATE_NOOP_UTF8```
 
-宏```QT_TR_NOOP```和```QT_TRANSLATE_NOOP```的区别就是是否有context上下文。若字符串定义在某个类里面，就是有上下文，上下文为类名字，可以直接用```QT_TR_NOOP```，对于定义在全局作用域，或者某个函数内部的static变量，就是没有context，需要宏```QT_TRANSLATE_NOOP```手动指定上下文，这样才能在Qlinguist看到待翻译的文本。运行过程中，用QApplication::translate()函数取出国际化后的语言。
+宏```QT_TR_NOOP```和```QT_TRANSLATE_NOOP```的使用区别：是否有context上下文。
+- 若字符串定义在某个类里面，就是有上下文，上下文context为类名字，可以直接用```QT_TR_NOOP```
+- 对于定义在全局作用域，或者某个函数内部的static变量，就是没有context，需要宏```QT_TRANSLATE_NOOP```手动指定上下文，这样才能在Linguist看到待翻译的文本。
 
-## 具有上下文，使用QT_TR_NOOP
+## 有上下文，使用QT_TR_NOOP
 
 考虑以下错误的代码片段
 
@@ -192,7 +194,7 @@ CODECFORTR这个参数指定了生成ts文件时候的编码，若未指定合�
 
 现象：运行的时候却不能动态的从names数组中取出国际化语言。因为QStringList数组names是在编译期间确定的，不能动态地返回tr()的结果。因此从names取出的字符串是固定的值。
 
-要实现动态翻译，可以把代码稍作修改：把names声明为char数组而不是QStringList，该char数组每一个元素使用宏QT_TR_NOOP_UTF8包裹着字符串。在程序运行时，取出char字符串后作为tr()函数的参数，在运行时动态返回tr()结果。
+要实现动态翻译，可以把代码稍作修改：把names声明为char数组而不是QStringList，该char数组每一个元素使用宏QT_TR_NOOP_UTF8包裹着字符串。在程序运行时，若需要获取国际化语言，则取出char字符串后作为tr()函数的参数，并返回翻译结果。
 
     // ------ MyButton.h ----------
     // 修改names数组的定义
@@ -257,12 +259,12 @@ QT_TR_NOOP宏的作用不会修改char数组字符串，仅仅是为了让lupdat
 
 QT_TRANSLATE_NOOP宏的作用同样不会修改char数组字符串，仅仅是为了让lupdate命令识别出这是一个待翻译的字符串。其context为自己指定的字符串。
 
-当在运行过程中，需要取出国际化文本时，不使用tr()，而是QApplication::translate()并传入context和char。
+当在运行过程中，需要取出国际化文本时，不使用tr()，而是QCoreApplication::translate()并传入参数context和char。
 
 # 参考资料
 
 [Qt国际化（源码含中文时）的点滴分析](https://blog.csdn.net/dbzhang800/article/details/6334852)
 
-[Qt官方文档：linguist中使用QT_TR_NOOP](https://doc.qt.io/archives/qt-4.8/linguist-programmers.html#using-qt-tr-noop-and-qt-translate-noop)
+[Qt官方文档：Linguist中使用QT_TR_NOOP](https://doc.qt.io/archives/qt-4.8/linguist-programmers.html#using-qt-tr-noop-and-qt-translate-noop)
 
 [Qt官方文档：QT_TR_NOOP](https://doc.qt.io/archives/qt-4.8/qtglobal.html#QT_TR_NOOP)
