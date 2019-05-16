@@ -114,11 +114,13 @@ CODECFORTR这个参数指定了生成ts文件时候的编码，若未指定合�
 2. 全局变量（定义在全局作用域的变量，此时无上下文）
 3. const常量（运行期间不能被修改）
 
-既然是编译期间确定的变量，在运行期间就不能随意改变它们内存中的数据，应该怎么样返回国际化后的字符串呢？Qt提供两个宏```QT_TR_NOOP```和```QT_TRANSLATE_NOOP```，对应的UTF-8编码的宏为```QT_TR_NOOP_UTF8```和```QT_TRANSLATE_NOOP_UTF8```
+既然是编译期间确定的变量，在运行期间就不能随意改变它们内存中的数据，应该怎么样返回国际化后的字符串呢？
 
-宏```QT_TR_NOOP```和```QT_TRANSLATE_NOOP```的使用区别：是否有context上下文。
-- 若字符串定义在某个类里面，就是有上下文，上下文context为类名字，可以直接用```QT_TR_NOOP```
-- 对于定义在全局作用域，或者某个函数内部的static变量，就是没有context，需要宏```QT_TRANSLATE_NOOP```手动指定上下文，这样才能在Linguist看到待翻译的文本。
+Qt提供两个宏QT_TR_NOOP和QT_TRANSLATE_NOOP，对应的UTF-8编码的宏为QT_TR_NOOP_UTF8和QT_TRANSLATE_NOOP_UTF8。
+
+宏QT_TR_NOOP和QT_TRANSLATE_NOOP的使用区别：是否有context上下文。
+- 若字符串定义在某个类里面，就是有上下文，上下文context为类名字，可以直接用QT_TR_NOOP
+- 对于定义在全局作用域，或者某个函数内部的static变量，就是没有context，需要宏QT_TRANSLATE_NOOP手动指定上下文，这样才能在Linguist看到待翻译的文本。
 
 ## 有上下文，使用QT_TR_NOOP
 
