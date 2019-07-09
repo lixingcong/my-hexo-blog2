@@ -65,6 +65,15 @@ xxx为/dev/mapper下将要创建的文件名，可以随意设置。当解密成
 
 实测Kubuntu 18.04支持直接从资源管理器输入密码挂载加密分区。
 
+也可以自己指定在/etc/fstab挂载已解密的分区，不过要指定noauto方式，最终还是得手动挂载
+
+    # 记下/dev/mapper/xxx的 UUID
+    sudo blkid
+    /dev/mapper/luks-0dee9fef-33c4-423e-9d4b-d39c8bd5adac: LABEL="hello" UUID="7455aa01-e36f-4771-9f9b-723d786416ec" TYPE="ext4"
+
+    # vi /etc/fstab增加一行
+    UUID=7455aa01-e36f-4771-9f9b-723d786416ec /tmp/hello ext4 defaults,user,noauto 0 2
+
 ## 增加、删除slot
 
 LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个slot目的就是加密master-key。
