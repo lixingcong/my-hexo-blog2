@@ -30,6 +30,37 @@ Linux内核自带的磁盘分区加密，与Android的dm-crypt同样方便。
 
     sudo cryptsetup --key-file /tmp/MyKey.bin luksFormat /dev/sda2
 
+## 挂载、卸载分区
+
+创建后，挂载加密分区
+
+    # 密码
+    sudo cryptsetup luksOpen /dev/sda2 xxx
+
+    # key-file
+    sudo cryptsetup luksOpen /dev/sda2 --key-file /tmp/MyKey.bin xxx
+
+xxx为/dev/mapper下将要创建的文件名，可以随意设置。当解密成功后可以直接操作/dev/mapper/xxx这个块设备，而不是操作/dev/sda2。
+
+实际上系统会自动创建软链接到/dev/dm-yyy（yyy是数字），指向/dev/mapper/xxx这个块设备（。
+
+第一次挂载时，需要格式化这个分区，设置卷标（可选操作）
+
+    sudo mkfs.ext4 /dev/mapper/xxx
+    sudo e2label /dev/mapper/xxx "my-private"
+
+挂载该分区
+
+    mkdir /tmp/my-priavte
+    sudo mount /dev/mapper/xxx /tmp/my-priavte
+
+使用完毕后，卸载分区
+
+    sudo umount /tmp/my-priavte
+    sudo cryptsetup luksClose /dev/mapper/xxx
+
+实测Kubuntu 18.04支持直接从资源管理器输入密码挂载加密分区。
+
 ## 增加、删除slot
 
 LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个slot目的就是加密master-key。
@@ -140,3 +171,9 @@ dump的时候，无论是通过哪个slot验证，输出的master key都是同�
     sudo cryptsetup luksOpen --master-key-file /tmp/master-key.bin
 
 知道这玩意的可怕了吗？Master Key更需要妥善保管！！
+
+## 参考链接
+
+[编程随想：扫盲 dm-crypt——多功能 Linux 磁盘加密工具](https://program-think.blogspot.com/2015/10/dm-crypt-cryptsetup.html)
+[10 Linux cryptsetup Examples for LUKS Key Management](https://www.thegeekstuff.com/2016/03/cryptsetup-lukskey/)
+[LUKS: Add a Backup Key, Backup, Restore and Delete LUKS Volume Header](https://www.lisenet.com/2013/luks-add-keys-backup-and-restore-volume-header/)
