@@ -44,7 +44,7 @@ xxx为/dev/mapper下将要创建的文件名，可以随意设置。当解密成
 
 实际上系统会自动创建软链接到/dev/dm-yyy（yyy是数字），指向/dev/mapper/xxx这个块设备（。
 
-第一次挂载时，需要格式化这个分区，设置卷标（可选操作）
+若第一次挂载前，需要格式化这个分区，设置卷标（可选操作）
 
     sudo mkfs.ext4 /dev/mapper/xxx
     sudo e2label /dev/mapper/xxx "my-private"
@@ -53,6 +53,10 @@ xxx为/dev/mapper下将要创建的文件名，可以随意设置。当解密成
 
     mkdir /tmp/my-priavte
     sudo mount /dev/mapper/xxx /tmp/my-priavte
+
+若第一次挂载，记得设置恰当的访问权限，否则没权限读写啊
+
+    sudo chown username:username -R /tmp/my-priavte
 
 使用完毕后，卸载分区
 
