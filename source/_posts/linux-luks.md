@@ -72,9 +72,9 @@ xxx为/dev/mapper下将要创建的文件名，可以随意设置。当解密成
     /dev/mapper/luks-0dee9fef-33c4-423e-9d4b-d39c8bd5adac: LABEL="hello" UUID="7455aa01-e36f-4771-9f9b-723d786416ec" TYPE="ext4"
 
     # vi /etc/fstab增加一行
-    UUID=7455aa01-e36f-4771-9f9b-723d786416ec /tmp/hello ext4 defaults,user,noauto 0 2
+    UUID=7455aa01-e36f-4771-9f9b-723d786416ec /tmp/hello ext4 defaults,noauto 0 2
 
-## 增加、删除slot
+## 增加、删除、修改slot
 
 LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个slot目的就是加密master-key。
 
@@ -91,9 +91,12 @@ LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个s
     # 密码方式
     sudo cryptsetup luksAddKey
 
-    # key-file方式
+    # key-file方式，创建一个新keyfile
     dd if=/dev/urandom of=/tmp/MyAnotherKey.bin bs=1k count=64
-    sudo cryptsetup luksAddKey --key-file /tmp/MyAnotherKey.bin
+    # 法1: 验证原有的keyfile，再添加另一个keyfile
+    sudo cryptsetup luksAddKey /tmp/MyAnotherKey.bin --key-file /tmp/MyKey.bin
+    # 法2: 验证原有密码，再添加另一个keyfile
+    sudo cryptsetup luksAddKey /tmp/MyAnotherKey.bin
 
 删除slot的方法一：通过slot号码删除
 
@@ -111,6 +114,17 @@ LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个s
 若要删除所有slots（不需要验证密码，不可逆的毁灭性操作，只能通过恢复已备份的header来拯救）
 
     sudo cryptsetup luksErase
+
+修改slot，以下方法都可以
+
+    # 验证原有密码，修改密码
+    sudo cryptsetup luksChangeKey /dev/sda2
+    #  验证原有密码，修改成另一个keyfile
+    sudo cryptsetup luksChangeKey /dev/sda2 /tmp/MyAnotherKey.bin
+    # 验证原有的keyfile，修改成新密码
+    sudo cryptsetup luksChangeKey /dev/sda2 --key-file /tmp/MyKey.bin
+    # 验证原有的keyfile，修改成另一个keyfile
+    sudo cryptsetup luksChangeKey /dev/sda2 /tmp/MyAnotherKey.bin --key-file /tmp/MyKey.bin
 
 ## 备份、恢复、擦除Header
 
