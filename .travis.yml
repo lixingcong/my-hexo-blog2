@@ -24,6 +24,6 @@ before_script:
 - moveFileHere source
 - moveFileHere themes
 - moveFileHere deploy.sh
-- mmoveFileHere _config.yml
+- moveFileHere _config.yml
 script:
 - hexo g && bash deploy.sh
