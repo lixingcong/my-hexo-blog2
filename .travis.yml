@@ -11,17 +11,19 @@ before_install:
 - eval $(ssh-agent)
 - ssh-add ~/.ssh/id_rsa
 - cp .travis/ssh_config ~/.ssh/config
-install:
-- npm install -g hexo-cli
-- hexo init hexo-empty
-- pushd hexo-empty
-- npm install
-- popd
-- mv hexo-empty/node_modules ./
-- mv hexo-empty/package.json ./
-before_script:
 - git config --global user.name 'lixingcong'
 - git config --global user.email 'lixingcong@live.com'
 - git submodule update --init --recursive
+install:
+- npm install -g hexo-cli
+before_script:
+- hexo init hexo-empty-dir
+- cd hexo-empty-dir
+- npm install
+- moveFileHere() {rm -rf $1 && mv ../$1 ./;}
+- moveFileHere source
+- moveFileHere themes
+- moveFileHere deploy.sh
+- mmoveFileHere _config.yml
 script:
 - hexo g && bash deploy.sh
