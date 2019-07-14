@@ -20,7 +20,7 @@ before_script:
 - hexo init hexo-empty-dir
 - cd hexo-empty-dir
 - npm install
-- moveFileHere() {rm -rf $1 && mv ../$1 ./;}
+- moveFileHere() { rm -rf $1 && mv ../$1 ./; }
 - moveFileHere source
 - moveFileHere themes
 - moveFileHere deploy.sh
