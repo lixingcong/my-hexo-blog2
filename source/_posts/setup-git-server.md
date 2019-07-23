@@ -84,6 +84,8 @@ categories: 网络
 
 	~/bin/gitolite setup -pk /tmp/alice.pub
 
+执行上面一条命令后，/tmp/alice.pub 被拷贝到~/.gitolite/keydir目录下，并且仓库gitolite-admin克隆到本地后，keydir目录也有一份alice.pub。
+
 所有仓库存放在```~/repositories```下，gitolite会自动修改```~/.ssh/authorized_keys```实现不同用户的访问。
 
 因此单独使用一个git用户的目的是，不希望用户手动修改authorized_keys里面的内容，而是通过gitolite来间接修改它。

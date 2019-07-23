@@ -120,6 +120,21 @@ HEAD指针可以理解为最近一次的提交。
 
 	git push origin [tagname]
 
+注意：打标签有两种方式，一种称之为轻量级“lightweight”，另一种是正常的“annotated”。不带任何参数运行git tag就是轻量级，加上```-a```参数就是annotated
+
+|标签|命令|特点|用途|
+|--|--|--|--|
+|lightweight|```git tag v1.0```|不含任何tagger信息，仅仅是将某次commit作为tag|不建议使用，但可以暂时作为二分查找bisect的临时标签|
+|annotated|```git tag -a v1.0```|完整的标签，含tagger所有信息：文字信息，作者，日期，GPG签名值|建议使用，作为正常发布的release tag|
+
+摘录一段关于lightweight标签的[博客文章](http://gitready.com/beginner/2009/02/03/tagging.html)
+
+> So, how does one create a tag? Just git tag v1.0.0 right? WRONG. You usually don't want to do that. In fact, some suggest that this command does the wrong thing by default. Without arguments, git tag creates a  "lightweight" tag that is basically a branch that never moves. 
+
+> Lightweight tags are still useful though, perhaps for marking a known good (or bad) version, or a bunch of commits you may need to use in the future. Nevertheless, you probably don't want to push these kinds of tags.
+
+上述意思就是不鼓励我们使用lightweight标签，不鼓励push到上游。
+
 ### 创建忽略提交名单
 
 功能就是防止提交上去。忽略.o这种c语言中间文件例：
