@@ -3,7 +3,7 @@ date: 2016-11-15 21:04:13
 tags: [翻译, Anki]
 categories: 读书笔记
 ---
-Anki是我从2013年开始使用的卡牌软件，用于学习一门外语，或者突击复习材料繁多的考试。Anki自定义卡牌非常强大。近期花时间阅读了官方英文文档，在这里写下自己的翻译和理解。
+Anki是我从2013年开始使用的卡牌软件，用于学习一门外语，或者突击复习材料繁多的考试。Anki自定义卡牌非常强大。近期花时间阅读了[官方英文文档][anki-manual]，在这里写下自己的翻译和理解。
 <!-- more -->
 ## 简介
 
@@ -260,6 +260,8 @@ add new from basic，名字“标准日语初级生词”。
 
 在查找栏输入特定的查找命令匹配collection里面的所有卡片
 
+> 更多搜索语法，请参考[anki文档][anki-manual]的"Seraching"小节。
+
 普通词如下
 
 |查找命令|匹配|匹配举例|
@@ -306,6 +308,8 @@ add new from basic，名字“标准日语初级生词”。
 |rated:1|今天回答过的卡片|
 |rated:1:2|今天回答过的卡片中选过Hard(2)的卡片|
 |rated:7:1|近7天回答过的卡片中选过Again(2)的卡片|
+|is:suspended|是否暂停|
+|is:due|是否到期的卡片（即将学习或复习）|
 
 ## 过滤卡片组
 
@@ -361,12 +365,14 @@ add new from basic，名字“标准日语初级生词”。
 
 ## 参考资料
 
+[Anki官方文档][anki-manual]
 [Anki设置自定义学习步骤：Software Review Redux: Anki][anki_steps]
 [翻譯Anki用戶指南@大學生活紀事 - blogspot][anki_doc_taiwan]
 [Effective learning: Twenty rules of formulating knowledge][20rules]
 [知乎专栏:Anki-近乎完美的神器][zhihu_anki]
 
-[anki_steps]: http://www.matcheducation.org/blog/2014/04/18/software-review-redux-anki
+[anki-manual]: https://apps.ankiweb.net/docs/manual.html
+[anki_steps]: http://web.archive.org/web/20170609024658/http://www.matcheducation.org/blog/2014/04/18/software-review-redux-anki
 [cloze_demo]: https://zhuanlan.zhihu.com/p/21483899?refer=-anki
 [anki_doc_taiwan]: http://wlhunag.blogspot.com/2013/06/Anki-tutorial-TOC.html
 [20rules]: https://www.supermemo.com/en/articles/20rules
