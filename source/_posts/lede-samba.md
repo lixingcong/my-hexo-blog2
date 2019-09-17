@@ -1,14 +1,14 @@
 ---
-title: LEDE的samba服务器配置
+title: OpenWrt/LEDE的samba服务器配置
 date: 2017-11-25 20:11:07
 tags: openwrt
 categories: 网络
 ---
-在LEDE路由器上设置samba服务器，分享插入U盘的内容，兼容Windows读写权限。
+在路由器上设置samba服务器，分享插入U盘的内容，兼容Windows读写权限。
 <!-- more -->
 ## 安装USB驱动
 
-首先要成功挂载USB盘符，根据不同的文件系统，可选安装不同的驱动，比如下面只安装ext4和FAT32驱动。若要读写NTFS分区，参考[Openwrt Wiki: Writeable NTFS](https://wiki.openwrt.org/doc/howto/writable_ntfs)
+首先要成功挂载USB盘符，根据不同的文件系统，可选安装不同的驱动，比如下面只安装ext4和FAT32驱动。若要读写NTFS分区，参考[Openwrt Wiki: Writeable NTFS](https://wiki.openwrt.org/doc/howto/writable_ntfs)，即安装ntfs-3g软件包
 
 	opkg update
 	
@@ -29,7 +29,11 @@ categories: 网络
 
 ## 自动挂载/卸载U盘
 
-免除每次插入终端输入mount命令，umount。从网上抄的一段代码：
+可以直接安装block-mount软件包，这样在luci web的system->mount points界面勾选“Anonymous Mount, Mount filesystems not specifically configured”即可自动挂载。
+
+	opkg install block-mount
+
+若不安装block-mount软件包，也可以通过hotplud脚本实现自动挂载（但是umount部份显得太暴力）。从网上抄的一段代码：
 
 	# 编辑
 	vi /etc/hotplug.d/block/10-mount
@@ -68,6 +72,10 @@ categories: 网络
 
 	opkg install luci-app-samba
 
+在Luci web的Service->Network share中General settings取消这个选项，不让其显示多余的HOME目录
+
+	Share home-directories
+
 由于我是使用root用户进行u盘读写，设置允许root登陆samba才能实现写权限（若追求权限管理安全，请不要开启root登陆，本文贪图一时方便。）
 
 	vi /etc/samba/smb.conf.template
@@ -76,10 +84,17 @@ categories: 网络
 	
 	# 添加NTLMv2认证，否则samba在NT6内核以上(win7,8,10)登陆samba认证失败
 	client ntlmv2 auth = yes
+
+	# 若要监听所有接口(0.0.0.0)，将bind only设置为no
+	bind interfaces only = no
 	
 新建一个samba用户root，并设置合适的密码
 
 	smbpasswd -a root
+
+日后修改密码
+
+	smbpassed root
 
 然后luci界面中Services->Network Share设置分享的目录。下面的文件掩码设置为最大（不安全）
 
@@ -98,12 +113,19 @@ categories: 网络
 
 若不想使用root用户作为samba的使用者，可以自行增加用户。但是对相应的目录有对应的读写权限。
 
-可以手工编辑passwd增加用户，这里以newuser为例
+因为openwrt默认设计成单用户(root)，故[手工编辑文件增加用户](https://stantsui.blogspot.com/2016/10/openwrt-add-samba-user.html)
 
-	vi /etc/passwd
+这里以新用户newuser和新的组newuser为例，假设新的UID=734和GID=734均未被系统使用。 对以下3个文件，分别添加一行
+
+|文件|添加一行|
+|--|--|
+|/etc/passwd|newuser:x:734:734:newuser:/tmp:/bin/false|
+|/etc/group|newuser:x:734:|
+|/etc/shadow|newuser:xyzDummyString:16666:0:99999:7:::|
 	
-	# 添加一行
-	newuser:x:0:0:newuser:/newuser:/bin/ash
+给Linux系统用户重新修改密码
+
+	pass newuser
 
 然后按照正常的samba命令添加用户
 
