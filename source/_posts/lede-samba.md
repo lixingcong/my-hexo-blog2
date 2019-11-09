@@ -8,6 +8,11 @@ categories: 网络
 <!-- more -->
 ## 安装USB驱动
 
+不同USB控制器，有不同的USB控制器驱动
+- xhci for USB3.0
+- ehci for USB2.0
+- uhci or ohci for USB1.1
+
 首先要成功挂载USB盘符，根据不同的文件系统，可选安装不同的驱动，比如下面只安装ext4和FAT32驱动。若要读写NTFS分区，参考[Openwrt Wiki: Writeable NTFS](https://wiki.openwrt.org/doc/howto/writable_ntfs)，即安装ntfs-3g软件包
 
 	opkg update
@@ -16,10 +21,21 @@ categories: 网络
 	  kmod-usb-storage \
 	  kmod-fs-ext4 \
 	  kmod-fs-vfat \
-	  kmod-usb-ohci \
-	  kmod-usb-uhci \
 	  mkf2fs \
 	  f2fsck
+
+检查USB控制器是否工作正常
+
+	opkg install usbutils
+	lsusb -t
+
+结果如下（以USB3.0控制器为例）
+
+	root@OpenWrt:~# lsusb -t
+	/:  Bus 04.Port 1: Dev 1, Class=root_hub, Driver=xhci-hcd/0p, 5000M
+	/:  Bus 03.Port 1: Dev 1, Class=root_hub, Driver=xhci-hcd/1p, 480M
+	/:  Bus 02.Port 1: Dev 1, Class=root_hub, Driver=xhci-hcd/1p, 5000M
+	/:  Bus 01.Port 1: Dev 1, Class=root_hub, Driver=xhci-hcd/1p, 480M
 
 安装完后，插入USB磁盘，应该可以观察到/dev/下面多了sda sda1 sda2等块设备，测试一下是否挂载成功：
 
@@ -67,6 +83,8 @@ categories: 网络
 实现U盘热插拔自动挂载卸载。
 
 ## 配置samba
+
+本文以samba3为例（较老的版本，占用空间较少，但性能一般，若追求性能可以选用samba4，从openwrt 18.06开始官方支持samba4）
 
 安装luci程序，它会自动安装samba36。
 
@@ -132,3 +150,26 @@ categories: 网络
 	smbpasswd -a newuser
 	
 将用户填入Luci界面中的Allowed Users即可。
+
+## samba性能
+
+最好使用LAN有线测试性能，确认为最佳性能再使用无线测试。
+
+修改smb.conf.template文件
+
+	# No NTLMv1, force NTLMv2
+	ntlm auth = no
+	client ntlmv2 auth = yes
+	client use spnego principal = no
+	client max protocol = SMB3
+	server max protocol = SMB3
+
+	# buffer size
+	socket options = TCP_NODELAY SO_KEEPALIVE IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072
+	use sendfile = yes
+	aio read size = 16384
+	aio write size = 16384
+	write raw = yes
+	read raw = yes
+
+其它优化：对sysctl.conf文件增加读写缓冲内存（会显著增加内存使用），这里就不列出了，感觉都没什么效果。
