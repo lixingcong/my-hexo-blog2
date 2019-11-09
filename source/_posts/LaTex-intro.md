@@ -19,6 +19,12 @@ categories: 网络
     替换为固定的js链接：
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
+使用两个美元符号开始和结束，代表公式居中显示，使用一个美元符号，则不居中
+
+右键某个生成的图案，可以查看Mathjax在网页上的源码，快速知道latex源码
+
+![](/images/LaTex-intro/view.png)
+
 ## 符号定义
 
 ### 操作符
@@ -233,3 +239,11 @@ $9\equiv 3 \pmod{6}$   —— 语法：9\equiv 3 \pmod{6}
 |---|---|
 |$\cos^2 x +\sin^2 x = 1$|\cos^2 x +\sin^2 x = 1|
 |$\cos 90^\circ = 0$|\cos 90^\circ = 0|
+
+### 矩阵
+
+注意：换行```\\\\```实际转义后变成的是```\\```
+
+右击该公式，然后查看Tex语法。。。。不知道为什么贴上来代码总是被强制识别成LaTex代码...
+
+$\left[ \begin{matrix} 1 & 5 & 12 \\\\ -1 & 9 & 0 \\\\ 0 & 9 & 1+i \end{matrix} \right]$
