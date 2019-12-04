@@ -1,5 +1,5 @@
 ---
-title: 三维空间正交投影二维空间
+title: 三维坐标正交投影到二维平面
 date: 2019-11-09 16:42:15
 tags: [翻译, 3D, cpp]
 categories: [读书笔记]
@@ -281,8 +281,8 @@ $$\left[
     \begin{matrix}
     \frac{1}{width} & 0 & 0 & 0 \\\\
     0 & \frac{1}{height} & 0 & 0 \\\\
-    0 & 0 & -\frac{2}{Z_far-Z_near} & 0 \\\\
-    0 & 0 & -\frac{Z_far+Z_near}{Z_far-Z_near} & 1
+    0 & 0 & -\frac{2}{Z_{far}-Z_{near}} & 0 \\\\
+    0 & 0 & -\frac{Z_{far}+Z_{near}}{Z_{far}-Z_{near}} & 1
     \end{matrix} 
 \right]$$
 

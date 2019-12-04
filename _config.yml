@@ -169,3 +169,7 @@ theme_config:
   vendors:
     _internal: lib
     mathjax: //cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML
+
+  post_edit:
+    enable: true
+    url: https://github.com/lixingcong/my-hexo-blog2/blob/master/source/ # Link for view source
