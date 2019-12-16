@@ -110,6 +110,29 @@ rsync自带的rrsync脚本可以控制只允许客户使用rsync而不能进入b
 			in front of lines in /home/Tom/.ssh/authorized_keys
 	Connection to 123.123.123.123 closed.
 	
+## 只写
+
+在authorized_keys文件那一行有个只读参数ro，客户端是只读，不能修改目录。若设置成wo可以实现只写不读。
+
+rsyncd.conf文档中建议，write-only模式下，建议屏蔽delete参数（使用refuse options=delete）。可以避免客户端删掉服务器的文件，也就是只允许客户端增加、覆盖，不能删除内容。
+
+对应的rrsync脚本，可以修改几行屏蔽一些命令。
+
+	vi /home/Tom/bin/rrsync
+	
+	# 查找到这相关的行，将0修改为-1，即可屏蔽该参数
+	'delete' => 0,
+	'delete-after' => 0,
+	'delete-before' => 0,
+	'delete-delay' => 0,
+	'delete-during' => 0,
+	'delete-excluded' => 0,
+	'delete-missing-args' => 0,
+
+提示：可以将rrync文件另外复制一份再进行编辑，不同的ssh-key对应不同内容的的rrsync脚本
+
 ## 参考链接
 
 [Restricting rsync access with SSH](https://www.whatsdoom.com/posts/2017/11/07/restricting-rsync-access-with-ssh/)
+
+[rsyncd.conf manual](https://download.samba.org/pub/rsync/rsyncd.conf.html)
