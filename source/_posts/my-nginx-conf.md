@@ -102,6 +102,7 @@ configure参数控制要编译哪些模块
 	--with-http_xslt_module \
 	--with-stream \
 	--with-stream_ssl_module \
+	--with-stream_ssl_preread_module \
 	--with-threads \
 	--without-mail_pop3_module \
 	--without-mail_imap_module \
