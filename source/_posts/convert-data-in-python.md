@@ -12,14 +12,14 @@ categories: 编程
 |-|---|-----|-----|
 |到数字|[进制转换](#进制转换)|[字符转整数](#字符to整数)|[字节串转整数](#字节串to整数)|
 |到字符串|str()|[字符串编码解码](#字节串to字符串)|decode('hex')|
-|到字节码|[数字转字符串](#整数to字节串)|[字符串转字节串](#字符串to字节串)|no|
+|到字节码|[数字转字符串](#整数to字节串)|[字符串转字节串](#字符串to字节串)|🈚|
 
 还有常见的单个字符转换
 
-|函数|功能|记忆口诀|备注|
-|--|--|--|--|
-|chr|数字转成对应的ascii字符|chr长得很像char，因此转成char|范围为0~255|
-|ord|单个字符转对应ascii序号|digit为最后一个字母| |
+|函数|功能|记忆口诀|例子|备注|
+|--|--|--|--|--|
+|chr|数字转成对应的ascii字符|chr长得很像char，因此转成char|```chr(65) ==> A```|输入参数有效范围为0~255|
+|ord|单个字符转对应ascii序号|d为digit最后一个字母，因此转成数字|```ord('A') ==> 65```||
 
 ### 进制转换
 10进制转16进制: 
@@ -66,7 +66,7 @@ int(STRING,BASE)将字符串STRING转成十进制int，其中STRING的基是base
 struct中支持的格式如下表
 
 |Format|C-Type|Python-Type|字节数|备注|
-|------|------|------|------|
+|--|--|--|--|--|
 |x|pad byte|no value|1| |
 |c|char|string of length 1|1| |
 |b|signed char|integer|1| |
@@ -122,19 +122,24 @@ struct中支持的格式如下表
 
 ### 字符串to字节串
 [我用c++实现的encode(hex)和decode(hex)](#CPP实现encode)
-*decode和encode区别*
+
+**decode和encode区别**
 
 decode函数是重新解码，把CT字符串所显示的69dda8455c7dd425【每隔两个字符】解码成十六进制字符\x69\xdd\xa8\x45\x5c\x7d\xd4\x25
 
     CT='69dda8455c7dd425'
     print "%r"%CT.decode('hex')
+    # 输出结果
+    'i\xdd\xa8E\\}\xd4%'
 
 encode函数是重新编码，把CT字符串所显示的69dda8455c7dd425【每个字符】编码成acsii值，ascii值为十六进制显示，占两位。执行下列结果显示36396464613834353563376464343235等价于将CT第一个字符'6'编码为0x36h 第二个字符'9'编码为0x39h
 
     CT='69dda8455c7dd425'
     print "%r"%CT.encode('hex')
+    # 输出结果
+    '36396464613834353563376464343235'
     
-*可以理解为：decode解码，字符串变短一半，encode编码，字符串变为两倍长度*
+> 可以理解为：decode解码，字符串变短一半，encode编码，字符串变为两倍长度
 
 decode('ascii')解码为字符串Unicode格式。输出带有'u'
 encode('ascii')，编码为Unicode格式，其实python默认处理字符串存储就是Unicode，输出结果估计和原来的字符串一样。
