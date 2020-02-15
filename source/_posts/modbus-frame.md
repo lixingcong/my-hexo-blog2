@@ -1,18 +1,20 @@
 ---
-title: Modbus协议帧
+title: Modbus协议学习笔记
 date: 2020-02-12 14:46:03
 tags: [翻译, 协议]
 categories: [网络]
 ---
 人工翻译网上找到的Modbus协议文档，讲述不同封包的格式RTU/ASCII/TCP，大端存储，功能码。附加自己在工作中对协议的理解。
 <!-- more -->
-Modbus协议是通讯协议，广泛应用在设备之间的主从通讯。主站发送requset，从站作为response。Modbus协议与底层物理层无关。 其底层物理层常是RS232，RS422或RS485实现。
+Modbus协议是通讯协议，广泛应用在设备之间的主从通讯。主站发送requset，从站作为response。
 
 > 主站为master或者poll，从站为slave。
 
 在标准的modbus系统中，只有一个master设备，和最多247个slave设备（[信息来源](https://www.picotech.com/library/oscilloscopes/modbus-serial-protocol-decoding)）
 
 每个slave设备有一个唯一的地址，用一个字节表示，0表示广播地址，其余地址(1~247，最大支持247个slave设备)为其它设备所用。地址将出现在modbus帧中，用于区分本帧是发给哪个slave设备，地址有时候被称为slave ID，下文用slave ID来表示这个值。
+
+Modbus协议与底层物理层无关。其底层物理层常是RS232，RS422或RS485实现，也使用TCP或者UDP通讯。
 
 ## 数据字节序
 
@@ -24,7 +26,7 @@ Modbus协议是通讯协议，广泛应用在设备之间的主从通讯。主�
 
 Modbus官方[协议文档](http://www.modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf)中有一段话：
 
-> Data Encoding: Modbus uses a big-Endian representation for addresses and data items. This means
+> **Data Encoding**: Modbus uses a big-Endian representation for addresses and data items. This means
 that when a numerical quantity larger than a single byte is transmitted, the most
 significant byte is sent first.
 
@@ -58,7 +60,7 @@ u16 reg[2]={0x1234, 0x5678};
 |u32的字节序|字母组合|十六进制|十进制|
 |---|---|---|---|
 |Big-endian|ABCD|0x12345678|305419896|
-|Little-endian|CDBA|0x56781234|1450709556|
+|Little-endian|CDAB|0x56781234|1450709556|
 |Big-endian swap bytes|BADC|0x34127856|873625686|
 |Little-endian swap bytes|DCBA|0x78563412|2018915346|
 
@@ -450,3 +452,5 @@ slave回应帧PDU
 [Modbus interface tutorial](https://www.lammertbies.nl/comm/info/modbus)
 
 [PDF - INTRODUCTION TO MODBUS TCP/IP](https://www.prosoft-technology.com/kb/assets/intro_modbustcp.pdf)
+
+仿真软件:[Modbus Tool](https://www.modbustools.com/download.html)
