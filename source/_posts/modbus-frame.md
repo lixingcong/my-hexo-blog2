@@ -14,7 +14,13 @@ Modbus协议是通讯协议，广泛应用在设备之间的主从通讯。主�
 
 每个slave设备有一个唯一的地址，用一个字节表示，0表示广播地址，其余地址(1~247，最大支持247个slave设备)为其它设备所用。地址将出现在modbus帧中，用于区分本帧是发给哪个slave设备，地址有时候被称为slave ID，下文用slave ID来表示这个值。
 
-## 大端存储
+## 数据字节序
+
+### 8位数据
+
+建议使用16位数据表示，因为Modbus协议最小数据都是16位的，若强行使用8位数据可能有数组越界风险，如```char u8[11]```由于是11字节，Modbus读写按照16位对齐，那么最后字节容易越界。
+
+### 16位数据
 
 Modbus官方[协议文档](http://www.modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf)中有一段话：
 
@@ -22,24 +28,72 @@ Modbus官方[协议文档](http://www.modbus.org/docs/Modbus_Application_Protoco
 that when a numerical quantity larger than a single byte is transmitted, the most
 significant byte is sent first.
 
-在Modbus数据帧中，存储格式是大端，即0x1234和0x12345678这两个数据，对应char数组应该是
+在Modbus数据帧中，存储格式是大端，即对一个u16（unsigned short）的寄存器，值为0x1234，参考我的[用C实现对u16大端编码解码](/attachments/modbus-frame/modbus-big-endian.c)，对应char数组应该是：
 
 ```
-u8 d1[2]={0x12, 0x34};
-u8 d2[4]={0x12, 0x34, 0x56, 0x78};
+u8 data[2]={0x12, 0x34};
 ```
 
-我用C艹写了的转换函数，[点击我下载源码](/attachments/modbus-frame/modbus-big-endian.cpp)，主要有以下几个函数实现转换。使用了CPP的模板，目的是为了同时让unsigned和signed都编译通过。
+在下文[数据传输模式](#数据传输模式)内提到的封包步骤，需要遵循这个大端存储的规定。
+
+
+### 32位数据
+
+在满足**u16寄存器存储遵循以上大端字节序**条件下，也就是确保用03H功能码读取多个寄存器，每个u16值都是正确的，我们来考虑u32数据类型：
+
+32位数据常见以下几种
+
+- long
+- int32/uint32
+- float
+
+这里以无符号32位整数为例，u32需要用到两个u16寄存器，值分别为0x1234和0x5678，我们将这两个寄存器定义为
 
 ```
-T bufferToU16(const void* data); // 从buffer拿出来
-T bufferToU32(const void* data);
-
-void u32ToBuffer(T input, void* output); // 写入到buffer
-void u16ToBuffer(T input, void* output);
+u16 reg[2]={0x1234, 0x5678};
 ```
 
-在下文[数据传输模式](#数据传输模式)内提到的封包步骤，Modbus的起始地址、寄存器个数等官方字段，需要遵循这个大端存储的规定。而数据字段可以根据实际应用场合，选用适合的字节序，但仍强烈建议使用官方钦定的大端存储。
+两个寄存器内，从左到右四个字节定义为ABCD，即```A=12, B=34, C=56, D=78```。对A、B、C、D的四种组合有ABCD、CDBA、BADC、DCBA。那么对于这两个寄存器的值，会有四种不同的编码解码结果：
+
+|u32的字节序|字母组合|十六进制|十进制|
+|---|---|---|---|
+|Big-endian|ABCD|0x12345678|305419896|
+|Little-endian|CDBA|0x56781234|1450709556|
+|Big-endian swap bytes|BADC|0x34127856|873625686|
+|Little-endian swap bytes|DCBA|0x78563412|2018915346|
+
+在仿真器软件Modbus Slave 6.2.0设置Format菜单中，对于long数据（32位），就有如下图几种解析两个寄存器的方式（7.0以上版本界面可能没有ABCD字样，但是是同样的表示）：
+
+![](/images/modbus-frame/modbus-u32-abcd.png)
+
+因此在实际应用中，若使用两个寄存器来表示一个32位的数据，必须让master和slave都要采用同一套表示方法，否则得出的结果是错误的。
+
+### 64位数据
+
+32位数据常见以下几种
+
+- int64/uint64
+- double
+
+64位数据需要四个寄存器：
+
+```
+u16 reg[4]={0x0123, 0x4567, 0x89ab, 0xcdef};
+
+// A=01, B=23, C=45, D=67
+// E=89, F=ab, G=cd, H=ef 
+```
+
+与32位类似，这里就不重复讲，一表胜千言：
+
+|u64的字节序|字母组合|十六进制|十进制|
+|---|---|---|---|
+|Big-endian|ABCDEFGH|0x0123456789abcdef|8.1985529e+16|
+|Little-endian|GHEFCDAB|0xcdef89ab45670123|1.4839231e+19 |
+|Big-endian swap bytes|BADCFEHG|0x23016745ab89efcd|2.5224108e+18|
+|Little-endian swap bytes|HGFEDCBA|0xefcdab8967452301|1.7279656e+19|
+
+同理，若使用四个寄存器来表示一个64位的数据，必须让master和slave都要采用同一套表示方法。
 
 ## PDU
 
@@ -388,16 +442,6 @@ slave回应帧PDU
 
 - 在PLC中，大部份地址1表示第一个线圈或者寄存器，而在PDU封包过程中，地址0表示第一个。因此实际可能有一定的偏移值，都是可以自定义的。
 - 如果整个主从设备都是自己设计，就无所谓什么读保持寄存器还是写保持寄存器，可能只用到两个功能号（03H和10H），如果是主从设备其中一个是别人做的，大家就必须要遵守Modbus通用协议了。
-- 在PDU的“数据”字段中，对8bit以上的数据类型（如short, int、int64、float，double），可以不使用Modbus钦定的大端存储，选择小端、交换序都可以，只要master和slave使用相同的数据存储方式，就能保证通讯正常。常见的几种字节序：
-
-|字节序|对四字节数据ABCD存放|
-|--|--|
-|Big-endian|AB CD|
-|Little-endian|CD AB|
-|Big-endian byte swap|BA DC|
-|Little-endian byte swap|DC BA|
-
-- 使用03H功能码，读取非整数倍16bit的数据时，注意最后一个字节是否越界。因为Modbus都是按16bit对齐的，忽然冒出一个8bit可能会对齐期间越界。
 
 ## 参考文章
 
