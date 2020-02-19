@@ -101,9 +101,9 @@ u16 reg[4]={0x0123, 0x4567, 0x89ab, 0xcdef};
 
 Protocol Data Units简称PDU，是Modbus协议帧最小单元，由“功能码”+“数据”两个字段组成。
 
-### PDU与APU关系
+### PDU与ADU关系
 
-PDU封包完成后，对PDU进行更高一层的封包叫APU，APU直接发送给目标设备。
+PDU封包完成后，对PDU进行更高一层的封包叫ADU，ADU直接发送给目标设备。
 
 他们两者关系是：
 - PDU = Function code + Data
@@ -150,7 +150,7 @@ PDU封包完成后，对PDU进行更高一层的封包叫APU，APU直接发送�
 
 该传输模式的主要优点是易于人类阅读究竟传输了什么字节，便于调试。
 
-采用ASCII编码的APU帧结构如下表
+采用ASCII编码的ADU帧结构如下表
 
 |位置|起始|slave ID|功能码|数据N字节|LRC|末尾|
 |--|--|--|--|--|--|--|
@@ -171,7 +171,7 @@ PDU封包完成后，对PDU进行更高一层的封包叫APU，APU直接发送�
 
 数据直接为二进制内容，报文必须以连续流的形式发送。使用CRC作为校验和。
 
-采用RTU编码的APU帧结构如下表
+采用RTU编码的ADU帧结构如下表
 
 |位置|起始|slave ID|功能码|数据N字节|CRC|末尾|
 |--|--|--|--|--|--|--|
@@ -205,7 +205,7 @@ MBAP主要有以下几个字段
 
 Modbus TCP数据帧实际上是PDU加上7字节的MBAP而成。下图的左下角展示了Modbus TCP与PDU的关系，图的右上方展示了如何从串口RTU/ASCII帧去掉头部尾部得到PDU。
 
-![](/images/modbus-frame/modbus-tcp-apu.png)
+![](/images/modbus-frame/modbus-tcp-adu.png)
 
 
 帧格式
