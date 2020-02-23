@@ -5,9 +5,11 @@ categories: 读书笔记
 ---
 Anki是我从2013年开始使用的卡牌软件，用于学习一门外语，或者突击复习材料繁多的考试。Anki自定义卡牌非常强大。近期花时间阅读了[官方英文文档][anki-manual]，在这里写下自己的翻译和理解。
 <!-- more -->
+本文最后更新于：2020年2月23日
+
 ## 简介
 
-在背英语单词时，相信有人使用过一种“纸卡片”的方法：找一叠扑克牌大小的卡片，正反两面写上英文和中文意思，然后不断翻阅卡片，反复记忆，通常能达到比“机械地记忆”更好的效果。
+在背英语单词时，相信有人使用过一种“纸卡片”的方法：找一叠扑克牌大小的卡片，正反两面写上英文和中文意思，然后不断翻阅卡片，从正面英文思考背面中文，或者从背面中文思考正面英文，反复记忆，通常能达到比“机械地记忆”更好的效果。
 
 Anki就是一个类似于纸卡片工作原理的软件，可以制作几乎所有类型的卡片，方便随时随地复习。
 
@@ -24,6 +26,7 @@ Anki主要特点
 - 免费、开源，基于python+Qt
 - 使用流行的SuperMemo算法记忆曲线
 - 自定义卡片的CSS，支持Javascript，支持音频图片导入，LeTex公式
+- 卡片组支持导入导出纯文本（为[使用Excel批量制作卡片组](#Excel导入)提供了思路）
 - 跨平台，支持windows/linux/macOS/Android/iOS(收费)
 - 支持同步到AnkiWeb云端
 
@@ -40,19 +43,15 @@ Anki中基本名词定义
 |Note|笔记|生成卡片的一条数据库记录，一个笔记可以生成一张或者多张卡片|
 |Field|字段|一个笔记的字段，类似于数据库的字段，常用的字段："FrontContent","BackContent","ImageFile"|
 |Note Type|笔记类型|利用笔记生成卡片所用到的模板(Template)，类似于PowerPoint的母版|
-
-其它
-
-|英文|中文|备注|
-|--|--|--|
-|interval|复习间隔|概念不是学习步骤(learning step)中的"时间"，interval是卡片毕业后，该卡片下次出现的时间间隔|
-|collection|收藏集|Anki中所有的资料，包括笔记、卡片、牌组、卡片类型|
+|Interval|复习间隔|概念不是学习步骤(learning step)中的"时间"，Interval是卡片毕业后，该卡片下次出现的时间间隔|
+|Collection|收藏集|Anki中所有的资料，包括笔记、卡片、牌组、卡片类型|
+|Due|到期的卡片数目|到期=正在学习+复习队列，也就是卡片组三个数字中的棕色+绿色之和|
 
 ## 添加卡片组
 
 ### 获取卡片组
 
-可以下载(pre-made)别人的卡片组合，也可以自己创建(self-made)卡片组合。
+可以下载别人已经制作好的(pre-made)卡片组合，也可以自己创建(self-made)卡片组合。
 
 |Decks|Pros|Crons|
 |--|--|--|
@@ -64,13 +63,15 @@ Anki中基本名词定义
 > Creating your own deck is the most effective way to learn a complex subject. Subjects like languages and the sciences can’t be understood simply by memorizing facts — they require explanation and context to learn effectively. Furthermore, inputting the information yourself forces you to decide what the key points are, leading to a better understanding.
 >> "Do not learn if you do not understand." -- SuperMemo
 
-总之，要“基于理解地记忆”，绝对不能是机械的记忆！对于记忆方法，强烈推荐看一下这篇文章[Effective learning: Twenty rules of formulating knowledge][20rules]，我花了不少时间理解其中的精髓！
+总之，要“基于理解地记忆”，绝对不能是机械的记忆！对于记忆方法，强烈推荐看一下这篇文章[Effective learning: 20 rules of formulating knowledge][20rules]，我花了不少时间理解其中的精髓！
 
 如果您正在学习某本课本，而刚好有人分享了该课本的卡片组，这可以让你节省一些制作卡片的时间。不提倡直接拿别人的卡片，因为把别人的卡片组打开后会发现卡片很难懂，因为缺少相关背景资料和介绍。
 
+我的通常做法是，先去社区找找有没有pre-made卡片组，有的话就可以参考别人，筛选自己认为有用的卡片，根据记忆的上下文，增加适合的字段或删除不必要的字段，改造成self-make的卡片组。
+
 ## 学习
 
-Anki采用"Learning Steps"概念进行卡片的学习，每点击Show Answer按钮，出现几个"Again","Good","Easy"按钮进行"Reset Step","Next Step","Graduate"或者步骤。
+Anki采用"Learning Steps"概念进行卡片的学习，每点击Show Answer按钮，出现几个"Again","Good","Easy"按钮进行"Reset Step","Next Step","Graduate"的步骤。
 
 ![](/images/anki/anki_steps.png)
 
@@ -84,19 +85,29 @@ Learning Step是可以自定义的，比如我最近在学习日语记忆日文�
 
 |Step|设置时间（分钟）|意义|
 |--|--|--|
-|1|2|初始步骤(点击Again会进入该步骤)，约2分钟后卡片再现|
-|2|5|Step1->Step2，约5分钟后卡片将再次出现|
-|3|10|Step2->Step3，约10分钟后卡片将再次出现|
-|4|30|Step3->Step4，约30分钟后卡片将再次出现|
-|5|60|Step4->Step5，约60分钟后卡片将再次出现|
+|1|2|初始步骤(点击Again会进入该步骤)，在此步骤点击Good后，会约2分钟后卡片再现|
+|2|5|Step1->Step2，在此步骤点击Good后，约5分钟后卡片将再次出现|
+|3|10|Step2->Step3，在此步骤点击Good后，约10分钟后卡片将再次出现|
+|4|30|Step3->Step4，在此步骤点击Good后，约30分钟后卡片将再次出现|
+|5|60|Step4->Step5，在此步骤点击Good后，约60分钟后卡片将再次出现|
 
 如果在Step5记住了卡片（点击了"Good"或者"Easy"），那么卡片毕业了(Card is graduated)，卡片进入Review队列。Anki默认在下一天会再次出现（或者复习），随后将逐步增加出现的间隔（符合记忆曲线）。
 
 建议每个人根据学习材料的难度，修改自定义步骤，不采用默认的"1 10"步骤
 
+每张卡片都会经理三个阶段：新卡片、学习中、毕业。他们转换的关系如下：
+
+- 对新卡片点击Good会进入学习中，点击Easy会直接毕业
+- 对学习中的卡片点击Easy会直接毕业
+- 对学习中的卡片完成所有学习步骤，卡片毕业
+- 毕业后的卡片会按照一定的算法在将来重新出现，若点击Again会进入学习中
+- 毕业后的卡片可以通过卡片浏览器中的Reschedule操作，重新变成学习中的卡片
+
 ### Learning
 
-点击一个Deck进入学习模式(Learning Mode)，对于新卡片才有“学习模式”这个概念。
+对于新卡片，才有学习模式(Learning Mode或Learning Phrase)这个概念。
+
+已经毕业的卡片不属于学习模式，在下文[Reviewing小节](#Reviewing)会单独介绍毕业卡片，其打分界面会有所不同。
 
 学习模式下从左到右有三个打分按钮：Again,Good,Easy，桌面版的Anki，这三个按钮的快捷键是：1，2，3
 
@@ -124,7 +135,7 @@ Anki旧版本这个按钮是"Soon"
 
 ### Reviewing
 
-对于已经学习的卡片（可以是已经毕业的卡片）复习。
+对于已经学习的卡片（已经毕业的卡片）复习。
 
 从左到右有四个打分按钮：Again,Hard,Good,Easy。桌面版的Anki，这三个按钮的快捷键是：1，2，3，4
 
@@ -141,12 +152,12 @@ Anki旧版本这个按钮是"Soon"
 1. New interval(新间隔)设定的是Anki对于回答失误的卡片的新复习时间间隔(interval)的百分值，基数是卡片的上一个时间间隔(last interval)。举个例子：一张卡片上一次的复习间隔是100天，New interval设置为20表示20%，那么失误后，新的interval被设定为20天。
 2. Min interval(最小间隔)有效值值为不少于1的整数。默认值是1，表示Anki先通过New interval百分比计算得出的interval值，若该计算值大于Min interval，则被设定为Min interval值。
 3. Leech threshold(难点阈值)指定连续"Again"失误的阈值，超过阈值将采取特定动作。
-4. Leech action(难点动作)默认是到达记忆难点阈值后暂停卡片。
+4. Leech action(难点动作)默认是到达记忆难点阈值后暂停卡片。（其实可以选择另一个选项：标记该卡片）
 
 如果一张卡片进入了记忆难点（多次按Again达到难点阈值）被暂停，建议：
 - Waiting，等到真正学习机会再学
-- Deleting，删掉它，花时间学点简单的比死扣牛角尖更值得
-- Editing，修改笔记，也许改一下Hint，加几个图片，或者重新排版一下CSS，让大脑接受新的学习环境再去攻克它
+- Delete it，删掉它，花时间学点简单的比死扣牛角尖更值得
+- Edit it，修改笔记，也许改一下Hint，加几个图片，或者重新排版一下CSS，让大脑接受新的学习环境再去攻克它
 
 #### Hard
 
@@ -162,11 +173,15 @@ Anki旧版本这个按钮是"Soon"
 
 ### Overview数值
 
-学习过程中有从左到右的三个带颜色数值：蓝色+棕色+绿色
+学习过程中有从左到右的三个带颜色数值：
 
-	12 + 34 + 56
-	
-12代表是新卡片数量，34代表是正在学习的卡片数量，56代表待完成的复习卡片数（步骤越多，会随失败次数增加越多
+<span style="color:MediumBlue">12</span> + <span style="color:DarkGoldenRod">34</span> + <span style="color:MediumSeaGreen">56</span>
+
+|数字|颜色|说明|
+|--|--|--|
+|12|蓝色|是新卡片数量|
+|34|棕色|正在学习的卡片数量<br>due to be studied today which are currently in the learning phase|
+|56|绿色|待复习卡片数<br>due for review. (i.e. cards which have already graduated from the learning phase)|
 
 ### 卡片动作
 
@@ -212,8 +227,8 @@ add new from basic，名字“标准日语初级生词”。
 |--|--|
 |Chinese|中文意思|
 |AudioFile|媒体文件|
-|Japanese_1|平假名|
-|Japanese_2|日本繁体字|
+|Japanese_1|假名|
+|Japanese_2|日本繁体汉字|
 |Hint_ch2jp|自己写的提示，从中文联想出日文，或者写上自己的<br>理解，书中出现的页码数，也可以是例句等等|
 |Part_of_speech|词性|
 
@@ -311,6 +326,34 @@ add new from basic，名字“标准日语初级生词”。
 |is:suspended|是否暂停|
 |is:due|是否到期的卡片（即将学习或复习）|
 
+
+### 选中某卡片后的选项
+
+电脑版与[Android版][ankidroid-manual]这个界面稍有不同，可以参考对应客户端的文档。下图为AnkiDroid 2.9版本的选中几个卡片后点击菜单键的界面：
+
+![](/images/anki/AnkiDroid-CardBrowser.png)
+
+|英文|中文|备注|
+|--|--|--|
+|Reposition|重新定位|仅对新卡片有效：改变卡片出现顺序，如让B出现在A前面|
+|Reschedule|重新计划|会询问用户设定一个天数N，将卡片设定未来N天内进入学习队列末尾，不改变revision history|
+|Reset progress|重设进度|（Android版独有）立即放入复习队列末尾（不是学习队列，是复习队列哦）|
+
+对于Reschedule卡片设定新的学习进度，我从[这篇reddit帖子](https://www.reddit.com/r/Anki/comments/anqki1/anki_rescheduling_vs_repositioning_which_one_is/)看到一种说法是：
+
+- 你想快速复习（强调re-review）一下曾经记住过的卡片吗？那么可以创建过滤卡片组，方法举例：
+  1. 从CardBrowser中找出你要复习的卡片，全部创建一个标签，比如ToBeReviewed
+  2. 创建过滤卡片组，使用```deck: "XXX" tag: "ToBeReviewed"```将其挑选出来
+  3. 可选步骤：重新设定过滤卡片组的顺序、学习步骤。然后Rebuild重建
+
+- 你想重新学习（强调re-learn）卡片吗？那么可以使用Reschedule将卡片变成新卡片，如：设定2天后作为新卡片。
+
+注意：Reschudule不会改变某张卡片的回答历史(revision history)。历史是指：用户点击Good、Again的次数,历史会参与数据统计。Reschudule仅仅改变了卡片的状态(已毕业的卡片变成新卡片)，如果确实需要重新重置某卡片的回答历史，则需要导出改笔记，然后删掉该笔记，重新导入。
+
+附上AnkiDroid的统计图，均是从卡片的回答历史生成的（感觉比PC版统计的要好用）
+
+![](/images/anki/AnkiDroid-Stats.png)
+
 ## 过滤卡片组
 
 过滤卡片组(Filtered Deck)可以从某个Deck中抽取一部分卡片，用于特殊的学习目的
@@ -327,12 +370,15 @@ add new from basic，名字“标准日语初级生词”。
 
 |排序|说明|
 |--|--|
-|oldest seen first|按某卡片距离上次你看见它的时间排序，最长时间的优先|
-|increasing interval|按复习间隔排序|
-|ordered due|最近到期的优先|
-|ordered added|添加顺序：从旧到新|
-|ordered added first|添加顺序：从新到旧|
-|relative overdueness|相关已过期，比如考虑如下2张卡片：卡片A的interval为5d，已经过期了2天还没复习；卡片B的interval为400d，已经过期7天，按照本排序算法，那么卡片A优先于B。这种排序方式通常用于筛选出最处于濒临忘记状态，但是只要抓住机会就有可能记起来的卡片|
+|Oldest seen first|按某卡片距离上次你看见它的时间排序，最长时间的优先|
+|Random|随机，没有任何优先顺序|
+|Increasing interval|按复习间隔从小到大排序|
+|Decreasing intervals|按复习间隔从大到小排序|
+|Most lapases|失误最多的卡片排前面|
+|Ordered due|最近到期的优先，对正在学习、处于复习队列中的卡片优先展示|
+|Ordered added|添加顺序：从旧到新|
+|Latest(Ordered) added first|添加顺序：从新到旧|
+|Relative overdueness|相关已过期，比如考虑如下2张卡片：卡片A的interval为5d，已经过期了2天还没复习；卡片B的interval为400d，已经过期7天，按照本排序算法，那么卡片A优先于B。这种排序方式通常用于筛选出最处于濒临忘记状态，但是只要抓住机会就有可能记起来的卡片。此策略将那些最可能牢牢记住的卡片尽量忽略|
 
 ## Excel导入
 
@@ -363,9 +409,12 @@ add new from basic，名字“标准日语初级生词”。
 
 打开Deck即可看到新导入的卡片
 
+可选步骤：定制不同的卡片，定制CSS显示样式（可能绿色背景对眼镜更舒服？？）
+
 ## 参考资料
 
 [Anki官方文档][anki-manual]
+[AnkiDroid官方文档][ankidroid-manual]
 [Anki设置自定义学习步骤：Software Review Redux: Anki][anki_steps]
 [翻譯Anki用戶指南@大學生活紀事 - blogspot][anki_doc_taiwan]
 [Effective learning: Twenty rules of formulating knowledge][20rules]
@@ -375,5 +424,6 @@ add new from basic，名字“标准日语初级生词”。
 [anki_steps]: http://web.archive.org/web/20170609024658/http://www.matcheducation.org/blog/2014/04/18/software-review-redux-anki
 [cloze_demo]: https://zhuanlan.zhihu.com/p/21483899?refer=-anki
 [anki_doc_taiwan]: http://wlhunag.blogspot.com/2013/06/Anki-tutorial-TOC.html
-[20rules]: https://www.supermemo.com/en/articles/20rules
+[20rules]: https://www.supermemo.com/en/archives1990-2015/articles/20rules
 [zhihu_anki]: https://zhuanlan.zhihu.com/-anki
+[ankidroid-manual]: https://docs.ankidroid.org/manual.html
