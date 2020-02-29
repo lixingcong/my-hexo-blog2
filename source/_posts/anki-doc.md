@@ -32,6 +32,28 @@ Anki主要特点
 
 Anki凭借自己独特的应用方式和使用思路已经完爆Anki的师傅/父亲：SuperMemo！！全球各地的前辈们自己使用着的卡片已经分享到了[AnkiWeb](https://ankiweb.net/shared/decks)了！！
 
+大家都在怎么使用Anki学习/复习的。。。有人拿它来当作随时摘录英语句子的笔记本
+
+![](/images/anki/examples/twitter.jpg)
+
+有人拿它来当作一个小词典
+
+![](/images/anki/examples/apple.jpg)
+
+有人拿它来准备地理考试
+
+![](/images/anki/examples/geo.jpg)
+
+甚至还有人读医的在用Anki，是不是要做与2019-nCoV有关的研究呢？
+
+![](/images/anki/examples/bio.jpg)
+
+有人闲的蛋疼还恶搞川帝。。。
+
+![](/images/anki/examples/trump.gif)
+
+看来Anki这个软件简直就是通用的记忆/复习软件，我们也有必要去学习一下它是怎么使用，先从基本的术语开始。
+
 ## 术语
 
 Anki中基本名词定义
