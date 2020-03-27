@@ -137,6 +137,8 @@ PDU封包完成后，对PDU进行更高一层的封包叫ADU，ADU直接发送�
 
 ## 数据传输模式
 
+数据传输这过程，又叫ADU封包，此时不考虑PDU。
+
 常见的三种传输模式（transmission mode）为ASCII、RTU、TCP
 
 ### ASCII
@@ -266,7 +268,7 @@ Modbus TCP数据帧实际上是PDU加上7字节的MBAP而成。下图的左下�
 |01|01|Read Coils|[读多个线圈](#读多个线圈)|bit（布尔值）|
 |05|05|Write Single Coil|[写单个线圈](#写单个线圈)|bit（布尔值）|
 |15|0F|Write Multiple Coils|[写多个线圈](#写多个线圈)|bit（布尔值）|
-|02|02|Read Discrete Inputs|[读多个离散输入](读多个离散输入)|bit（布尔值）|
+|02|02|Read Discrete Inputs|[读多个离散输入](#读多个离散输入)|bit（布尔值）|
 
 下表是读写16bit数据（点击中文，电梯直达）：
 
