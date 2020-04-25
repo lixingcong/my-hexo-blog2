@@ -8,30 +8,35 @@ ubuntu我一直都是使用硬盘安装，没有试过烧录到u盘引导安装�
 
 ## 前戏
 
-确保U盘为fat32分区（uefi引导不支持ntfs），大约2GB，能装得下ubuntu的iso镜像，复制iso到该分区根目录下
+我要将iso和grub.cfg放置到某个盘的根目录下
 
-打开iso中的/boot/grub/grub.cfg，另存为到U盘根目录下。
+1.复制ubuntu-20.04-desktop-amd64.iso到该分区根目录下
+2.打开iso中的/boot/grub/grub.cfg，另存为该分区根目录下
 
-## 修改grub配置
+## 修改grub.cfg配置
 
 使用Notepad++或者类似的第三方记事本应用程序修改U盘根目录下grub.cfg
-*不使用系统自带记事本，因记事本这个坑爹货无法保存为Unix格式+UTF8*
+*不使用系统自带记事本，因记事本这个坑爹货无法保存为Unix换行符格式+UTF8*
 
 文件中部找到以 menuentry 开头的四段，把它们都删除了，换成下面的menuentry内容，
 
     menuentry "Install Ubuntu" {
-		set root=(hd1,msdos1)
-		loopback loop /ubuntu-14.04-desktop-amd64.iso
-		linux (loop)/casper/vmlinuz.efi persistent boot=casper iso-scan/filename="/ubuntu-14.04-desktop-amd64.iso" quiet splash ro locale=zh_CN.UTF-8 noprompt --
-		initrd (loop)/casper/initrd.lz
+		set root=(hd1,gpt3)
+		set isofile="/ubuntu-20.04-desktop-amd64.iso"
+		
+		loopback loop $isofile
+		linux (loop)/casper/vmlinuz persistent boot=casper iso-scan/filename=$isofile quiet splash ro locale=zh_CN.UTF-8 noprompt --
+		initrd (loop)/casper/initrd
     }
 
 以上内容，根据每个人电脑实际情况，要修改的地方有：
-- set root=(hd1,msdos1) 这个值随意写，反正都是错误的，后面步骤会改成正确的
-- ubuntu-14.04-desktop-amd64.iso 镜像文件名，需要修改两次
-- initrd.lz 和 vmlinuz.efi 根据iso中的casper文件夹下对应名称改动
+- set root=(hd1,gpt3) 这个值随意写，反正都是错误的，后面步骤会改成正确的
+- ubuntu-20.04-desktop-amd64.iso 镜像文件名，需要修改，注意放在根目录下时，要带上斜杠"/"
+- initrd 和 vmlinuz 根据iso中的casper文件夹下对应名称改动，有的可能是带efi后缀，有的可能压缩成lz文件
 
-## 添加LiveCD引导项
+## 添加EFI的GRUB引导项
+
+总之，先要EFI启动到GRUB2，才能进行下一步的安装，如果是MBR启动到GRUB2，是无法安装EFI的启动器的。
 
 在Win10下，使用DiskGenius等工具，挂载系统的ESP分区
 
@@ -52,7 +57,7 @@ WinRAR打开ubuntu的iso镜像文件，提取grubx64.efi解压到系统ESP分区
 
 注意：Win10如果直接重启无法进入LiveCD。正确做法：开始菜单-> “设置”-> “恢复”-> “使用高级启动”-> 选择“ubuntu_install”。
 
-## 设置LiveCD分区
+## 设置LiveCD的iso所在分区
 
 启动到grub2后，进入GRUB command line，这时候可以查看当前的所有分区
 
@@ -60,13 +65,13 @@ WinRAR打开ubuntu的iso镜像文件，提取grubx64.efi解压到系统ESP分区
 
 ![](/images/install_ubuntu_on_gpt/grub_4.png)
 
-记下U盘所在正确的分区号，比如我的U盘是(hd1,msdos1)，输入加载grub.cfg内容如下
+记下U盘所在正确的分区号，比如我的U盘是(hd1,gpt4)，输入加载grub.cfg内容如下
 
-	configfile (hd1,msdos1)/grub.cfg
+	configfile (hd1,gpt4)/grub.cfg
 
 屏幕会出现"Install Ubuntu"启动项。按e编辑"Install Ubuntu"启动项参数，修改
 
-	set root=(hd1,msdos1)
+	set root=(hd1,gpt4)
 
 修改后直接按F10启动系统，进入LiveCD。
 
