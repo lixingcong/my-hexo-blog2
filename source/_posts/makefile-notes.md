@@ -226,7 +226,7 @@ VPATH的特性：
     objects = foo.o bar.o
     all: main
     main: $(objects)
-    	$(CC) %^ -o $@
+    	$(CC) $^ -o $@
     $(objects): %.o: %.c
 		$(CC) -c $(CFLAGS) $< -o $@
         
