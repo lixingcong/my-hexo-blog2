@@ -57,16 +57,16 @@ ngx模块：
 	cd ~/nginx_my
 	
 	# nginx
-	wget http://nginx.org/download/nginx-1.15.6.tar.gz
-	tar xf nginx-1.15.6.tar.gz
+	wget http://nginx.org/download/nginx-1.18.0.tar.gz
+	tar xf nginx-1.18.0.tar.gz
 	
 	# modules
 	git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module
 	
 openssl取最新版
 
-	wget https://www.openssl.org/source/openssl-1.1.0j.tar.gz
-	tar xf openssl-1.1.0j.tar.gz
+	wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz
+	tar xf openssl-1.1.1g.tar.gz
 
 安装依赖。至于依赖什么，取决于编译nginx开启的模块。即下文的configure参数。
 
@@ -80,7 +80,7 @@ openssl取最新版
 configure参数控制要编译哪些模块
 
 	# 切换到Nginx源码目录
-	cd ~/nginx_my/nginx-1.13.0
+	cd ~/nginx_my/nginx-1.18.0
 	
 	./configure \
 	--with-cc-opt='-O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2' --with-ld-opt='-Wl,-Bsymbolic-functions -Wl,-z,relro' \
@@ -107,7 +107,8 @@ configure参数控制要编译哪些模块
 	--without-mail_pop3_module \
 	--without-mail_imap_module \
 	--without-mail_smtp_module \
-	--with-openssl=../openssl-1.1.0j \
+	--with-openssl=../openssl-1.1.1g \
+	--with-openssl-opt='enable-tls1_3' \
 	--add-module=../ngx_http_substitutions_filter_module \
 	--add-module=../ngx_brotli
 
@@ -168,9 +169,11 @@ nginx.conf中的server标签中添加
 	
 二、手动指定优先的加密算法
 
-	ssl_ciphers                EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+详见https://github.com/cloudflare/sslconfig/blob/master/conf
+
+	ssl_ciphers                ECDHE-RSA-CHACHA20-POLY1305:ECDHE+AES128:RSA+AES128:ECDHE+AES256:RSA+AES256:ECDHE+3DES:RSA+3DES;
 	ssl_prefer_server_ciphers  on;
-	ssl_protocols              TLSv1 TLSv1.1 TLSv1.2;
+	ssl_protocols              TLSv1.1 TLSv1.2 TLSv1.3;
 	
 三、跨站攻击
 
