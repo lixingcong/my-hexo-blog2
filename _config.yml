@@ -146,7 +146,7 @@ theme_config:
 
   google_analytics:
     tracking_id: UA-66672466-1
-    localhost_ignored: true
+    only_pageview: true
 
   social:
     Twitter: https://twitter.com/lixingcong || twitter
