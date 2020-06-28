@@ -150,10 +150,11 @@ ss-server -c config.json -p 3001 --plugin v2ray-plugin --plugin-opts "server"
         }
     }
 
-## 总结
+## 其它
 
-大体上就是拿stream的443端口作为对外端口。nginx使用```ssl_preread```模块预先读取SNI域名。如果是cloudflare则反代MTP，否则反代localhost的1025端口，对应V2Ray。
-
-MTProxy的TLS伪装让DPI检测代价更大，除非将该域名或者IP封锁。
+- nginx的加密套件可以选```流加密```（如chacha20-poly1305等），这样对安卓机子或者移动设备的CPU性能要求低一点，解密的速度也快一点，毕竟这个系统瓶颈还是得优化的。
+- nginx经过stream反向代理后，在```/var/log/nginx/access.log```日志文件里面，所有的访问者都是localhost，因此无法追踪来源。所以根据实际选择是否要stream共用端口。大体上就是拿stream的443端口作为对外端口。nginx使用```ssl_preread```模块预先读取SNI域名。如果是cloudflare则反代MTP，否则反代localhost的1025端口，对应V2Ray。
+- MTProxy的TLS伪装让DPI检测代价更大，除非将该域名或者IP封锁。
+- 开启TLS1.3更安全，因为握手包没有暴露任何明文的证书信息
 
 自从用上了TLS，我们又可以愉快地刷小黄图了！！

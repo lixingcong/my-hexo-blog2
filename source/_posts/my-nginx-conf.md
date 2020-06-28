@@ -5,6 +5,7 @@ categories: 网络
 ---
 自己网站的nginx配置，减少重复编译nginx查找资料耗费的时间。
 <!-- more -->
+更新日期：2020年6月28日
 
 ## 需求
 
@@ -17,7 +18,6 @@ categories: 网络
 |----|---|
 |[ngx_http_substitutions_filter_module](https://github.com/yaoweibin/ngx_http_substitutions_filter_module)|正则表达式|
 |[ngx_brotli](https://github.com/google/ngx_brotli)|谷歌开源压缩brotli库|
-|[libbrotli](https://github.com/bagder/libbrotli)|动态库，谷歌的字典压缩|
 
 ## 编译
 
@@ -25,30 +25,15 @@ categories: 网络
 
 	mkdir ~/nginx_my && cd nginx_my
 
-### libbrotli
-
-编译安装字典压缩库
-
-	cd ~/nginx_my
-	git clone https://github.com/bagder/libbrotli
-	cd libbrotli
-	./autogen.sh
-	./configure
-	make install
-	
-编译后添加默认的lib路径到系统变量中，避免启动Nginx找不到libbrotlienc.so.1
-
-如果需要自启动nginx，还要将系统变量添加到/etc/rc.local中和~/.bashrc文件中
-
-	# 增加
-	export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
-	
-ngx模块：
+### 各个模块 
 
 	cd ~/nginx_my
 	git clone https://github.com/google/ngx_brotli
 	cd ngx_brotli
 	git submodule update --init
+	
+	cd ~/nginx_my
+	git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module
 
 ### nginx
 
@@ -57,16 +42,32 @@ ngx模块：
 	cd ~/nginx_my
 	
 	# nginx
-	wget http://nginx.org/download/nginx-1.18.0.tar.gz
-	tar xf nginx-1.18.0.tar.gz
+	NGINX_VER=1.19.0
+	wget http://nginx.org/download/nginx-$NGINX_VER.tar.gz
+	tar xf nginx-$NGINX_VER.tar.gz
 	
-	# modules
-	git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module
+打patch，目的是让nginx优先chacha
+
+	# 参考 https://gist.github.com/DimsKyu/c3f3e7f8ef41ded430beefe0690b7b2d 这个代码，大致就是这样改
+	cd nginx-$NGINX_VER
+	vi src/event/ngx_event_openssl.c
+	# 找到ngx_ssl_create函数，在```#ifdef SSL_OP_NO_COMPRESSION```这行上面直接加上
+	
+	#ifdef SSL_OP_PRIORITIZE_CHACHA
+		SSL_CTX_set_options(ssl->ctx, SSL_OP_PRIORITIZE_CHACHA);
+	#endif
 	
 openssl取最新版
 
-	wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz
-	tar xf openssl-1.1.1g.tar.gz
+	OPENSSL_VER=1.1.1g
+	wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz
+	tar xf openssl-$OPENSSL_VER.tar.gz
+	
+打patch，目的是让nginx可以配置TLS 1.3加密算法套件（截止nginx 1.19.0这个版本，仍不能在nginx.conf中的ssl_ciphers属性配置TLS1.3的加密套件优先顺序，相关讨论如：https://www.v2ex.com/t/547650 ）
+
+	cd openssl-$OPENSSL_VER
+	wget https://github.com/hakasenyang/openssl-patch/raw/master/openssl-equal-1.1.1e-dev.patch
+	patch -p 1 < *.patch
 
 安装依赖。至于依赖什么，取决于编译nginx开启的模块。即下文的configure参数。
 
@@ -80,7 +81,7 @@ openssl取最新版
 configure参数控制要编译哪些模块
 
 	# 切换到Nginx源码目录
-	cd ~/nginx_my/nginx-1.18.0
+	cd ~/nginx_my/nginx-$NGINX_VER
 	
 	./configure \
 	--with-cc-opt='-O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2' --with-ld-opt='-Wl,-Bsymbolic-functions -Wl,-z,relro' \
@@ -107,8 +108,8 @@ configure参数控制要编译哪些模块
 	--without-mail_pop3_module \
 	--without-mail_imap_module \
 	--without-mail_smtp_module \
-	--with-openssl=../openssl-1.1.1g \
-	--with-openssl-opt='enable-tls1_3' \
+	--with-openssl=../openssl-$OPENSSL_VER \
+	--with-openssl-opt='enable-tls1_3 enable-ec_nistp_64_gcc_128 enable-weak-ssl-ciphers' \
 	--add-module=../ngx_http_substitutions_filter_module \
 	--add-module=../ngx_brotli
 
@@ -117,10 +118,9 @@ configure参数控制要编译哪些模块
 - 没有指定prefix，采用系统默认的前缀目录，如/usr/local/
 - 指定配置文件路径为/etc/nginx/nginx.conf
 - 开启basic_auth等模块，关闭邮件模块
-- 指定好openssl源码目录
+- 指定好openssl源码目录，开启TLS1.3加密套件
 - 添加几个额外的模块
 
-	
 直接编译即可
 
 	make && make install
@@ -169,11 +169,13 @@ nginx.conf中的server标签中添加
 	
 二、手动指定优先的加密算法
 
-详见https://github.com/cloudflare/sslconfig/blob/master/conf
+(对TLS 1.2有效。原版nginx 1.19.0对TLS1.3的ciphers暂未支持，因此若没有patch，无论ssl_ciphers设置什么值都是AES-256-GCM-SHA384）
 
-	ssl_ciphers                ECDHE-RSA-CHACHA20-POLY1305:ECDHE+AES128:RSA+AES128:ECDHE+AES256:RSA+AES256:ECDHE+3DES:RSA+3DES;
+推荐的加密套件设置，详见CloudFlare的仓库 https://github.com/cloudflare/sslconfig/blob/master/conf
+
+	ssl_ciphers                TLS-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305:ECDHE+AES128:RSA+AES128:ECDHE+AES256:RSA+AES256:ECDHE+3DES:RSA+3DES;
 	ssl_prefer_server_ciphers  on;
-	ssl_protocols              TLSv1.1 TLSv1.2 TLSv1.3;
+	ssl_protocols              TLSv1.2 TLSv1.3;
 	
 三、跨站攻击
 
