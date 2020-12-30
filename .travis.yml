@@ -16,6 +16,7 @@ before_install:
 - git submodule update --init --recursive
 install:
 - npm install -g hexo-cli
+- npm install hexo-util js-yaml --save
 before_script:
 - hexo init hexo-empty-dir
 - cd hexo-empty-dir
@@ -25,5 +26,6 @@ before_script:
 - linkFileHere themes
 - linkFileHere deploy.sh
 - linkFileHere _config.yml
+- linkFileHere _config.next.yml
 script:
 - hexo g && bash deploy.sh
