@@ -21,6 +21,7 @@ before_script:
 - hexo init hexo-empty-dir
 - cd hexo-empty-dir
 - npm install
+- npm install theme-next/hexo-next-utteranc
 - function linkFileHere { [[ -f $1 || -d $1 ]] && mv $1 $1.bak; ln -s ../$1 ./$1; }
 - linkFileHere source
 - linkFileHere themes

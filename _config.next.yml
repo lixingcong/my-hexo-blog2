@@ -936,3 +936,11 @@ vendors:
 css: css
 js: js
 images: images
+
+utteranc:
+  enable: true
+  repo: lixingcong/lixingcong.github.io
+  pathname: title
+  theme: github-light
+  cdn: https://utteranc.es/client.js
+
