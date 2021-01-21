@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies and init an empty hexo folder
         run: |
           npm install -g hexo-cli
-          npm install hexo-util js-yaml --save
+          npm install hexo-util js-yaml@3.14.0 --save
           hexo init hexo-empty-dir
 
       - name: Generate HTML
