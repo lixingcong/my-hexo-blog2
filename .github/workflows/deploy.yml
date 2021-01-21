@@ -48,4 +48,6 @@ jobs:
 
       - name: Generate and deploy
         run: |
-          hexo g && bash deploy.sh
+          git config --global user.name  github-action
+          git config --global user.email github-action@github.com
+          hexo generate && bash deploy.sh
