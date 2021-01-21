@@ -1,5 +1,5 @@
 Website: [my-blog](https://lixingcong.github.io)
 
-Travis CI build status: [![Travis CI](https://travis-ci.org/lixingcong/my-hexo-blog2.svg?branch=master)](https://travis-ci.org/lixingcong/my-hexo-blog2?branch=master)
+Github action build status: [![github-action-badge](https://github.com/lixingcong/my-hexo-blog2/actions)](https://github.com/lixingcong/my-hexo-blog2/workflows/deploy/badge.svg)
 
 Theme: [hexo-theme-next](https://theme-next.org/)

@@ -1,4 +1,4 @@
-name: build
+name: deploy
 
 on:
   push:
@@ -28,6 +28,7 @@ jobs:
           chmod 700 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+      # Error 'Function yaml.safeLoad is removed in js-yaml 4' occurred when using latest version(2021-01)
       - name: Install dependencies and init an empty hexo folder
         run: |
           npm install -g hexo-cli
