@@ -28,15 +28,15 @@ jobs:
           chmod 700 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Install dependencies
+      - name: Install dependencies and init an empty hexo folder
         run: |
           npm install -g hexo-cli
           npm install hexo-util js-yaml --save
-
-      - name: Init an empty hexo folder
-        run: |
           hexo init hexo-empty-dir
-          cd hexo-empty-dir
+
+      - name: Generate HTML
+        working-directory: ./hexo-empty-dir
+        run: |
           npm install
           npm install theme-next/hexo-next-utteranc
           function linkFileHere { [[ -f $1 || -d $1 ]] && mv $1 $1.bak; ln -s ../$1 ./$1; }
@@ -45,9 +45,12 @@ jobs:
           linkFileHere deploy.sh
           linkFileHere _config.yml
           linkFileHere _config.next.yml
+          hexo generate
 
-      - name: Generate and deploy
+      - name: Deploy to github
+        working-directory: ./hexo-empty-dir
         run: |
+          [ -d public ] || exit 1
           git config --global user.name  github-action
           git config --global user.email github-action@github.com
-          hexo generate && bash deploy.sh
+          bash deploy.sh
